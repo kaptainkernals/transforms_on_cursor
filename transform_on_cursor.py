@@ -19,11 +19,11 @@
 
 bl_info = {
     "name": "Transform on Cursor",
-    "author": "Mont29, Kaptainkernals",
-    "version": (0, 1),
+    "author": "Kaptainkernals",
+    "version": (0, 3),
     "blender": (2, 77, 0),
     "location": "3D view",
-    "description": "Rotate based on Cursor - based on cursor rotate script originally written by Mont29",
+    "description": "Rotate on cursor based on Mont29's pivot point cursor code, rotate based on new orientation based on selected vertices",
     "category": "3D View",
     }
 
@@ -31,28 +31,46 @@ import bpy
 
 def rotate(context):
     space = context.space_data
-    obj = bpy.context.active_object
-    back_pvpt = space.pivot_point
-    space.pivot_point = 'CURSOR'
-    bpy.ops.transform.rotate('INVOKE_DEFAULT')
-    space.pivot_point = back_pvpt
+    if space.type == 'VIEW_3D':
+        obj = bpy.context.active_object
+        back_pvpt = space.pivot_point
+        space.pivot_point = 'CURSOR'
+        bpy.ops.transform.rotate('INVOKE_DEFAULT')
+        space.pivot_point = back_pvpt
 
 
 def move(context):
     space = context.space_data
-    obj = bpy.context.active_object
-    back_pvpt = space.pivot_point
-    space.pivot_point = 'CURSOR'
-    bpy.ops.transform.translate('INVOKE_DEFAULT')
-    space.pivot_point = back_pvpt
+    if space.type == 'VIEW_3D':
+        obj = bpy.context.active_object
+        back_pvpt = space.pivot_point
+        space.pivot_point = 'CURSOR'
+        bpy.ops.transform.translate('INVOKE_DEFAULT')
+        space.pivot_point = back_pvpt
 
 def scale(context):
     space = context.space_data
-    obj = bpy.context.active_object
-    back_pvpt = space.pivot_point
-    space.pivot_point = 'CURSOR'
-    bpy.ops.transform.resize('INVOKE_DEFAULT')
-    space.pivot_point = back_pvpt
+    if space.type == 'VIEW_3D':
+        obj = bpy.context.active_object
+        back_pvpt = space.pivot_point
+        space.pivot_point = 'CURSOR'
+        bpy.ops.transform.resize('INVOKE_DEFAULT')
+        space.pivot_point = back_pvpt
+
+def orientation(context):
+    space = context.space_data
+    if space.type == 'VIEW_3D':
+        saved_location = bpy.context.scene.cursor_location.copy()
+        bpy.ops.transform.create_orientation(name="rotation_orientation", use=True, overwrite=True)
+        bpy.ops.view3d.snap_cursor_to_selected()
+        bpy.ops.mesh.select_all(action='SELECT')
+        back_pvpt = space.pivot_point
+        space.pivot_point = 'CURSOR'
+        bpy.ops.transform.rotate('INVOKE_DEFAULT')
+        bpy.ops.transform.delete_orientation()
+        bpy.context.space_data.transform_orientation = 'GLOBAL'
+        bpy.context.scene.cursor_location = saved_location
+        space.pivot_point = back_pvpt
 
 
 class RotateOnCursor(bpy.types.Operator):
@@ -92,19 +110,34 @@ class ScaleOnCursor(bpy.types.Operator):
 
     def execute(self, context):
         scale(context)
-        return {'FINISHED'}                
+        return {'FINISHED'}
+
+class RotateOnOrientation(bpy.types.Operator):
+    '''Rotate on Orientation'''
+    bl_idname = "mesh.rotate_on_orientation"
+    bl_label = "Rotate On Orientation"
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object != None
+
+    def execute(self, context):
+        orientation(context)
+        return {'FINISHED'}
 
 
 def register():
     bpy.utils.register_class(RotateOnCursor)
     bpy.utils.register_class(MoveOnCursor)
     bpy.utils.register_class(ScaleOnCursor)
+    bpy.utils.register_class(RotateOnOrientation)
 
 
 def unregister():
     bpy.utils.unregister_class(RotateOnCursor)
     bpy.utils.unregister_class(MoveOnCursor)
     bpy.utils.unregister_class(ScaleOnCursor)
+    bpy.utils.unregister_class(RotateOnOrientation)
 
 
 if __name__ == "__main__":
