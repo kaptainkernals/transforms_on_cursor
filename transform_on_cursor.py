@@ -29,30 +29,30 @@ bl_info = {
 
 import bpy
 
-def cursor(context):
+def rotate(context):
     space = context.space_data
     obj = bpy.context.active_object
-    space.pivot_point = 'CURSOR'
-
-def reset_cursor(context):
-    space = context.space_data
     back_pvpt = space.pivot_point
+    space.pivot_point = 'CURSOR'
+    bpy.ops.transform.rotate('INVOKE_DEFAULT')
     space.pivot_point = back_pvpt
 
-def rotate(context):
-    cursor(context)
-    bpy.ops.transform.rotate('INVOKE_DEFAULT')
-    reset_cursor(context)
 
 def move(context):
-    cursor(context)
+    space = context.space_data
+    obj = bpy.context.active_object
+    back_pvpt = space.pivot_point
+    space.pivot_point = 'CURSOR'
     bpy.ops.transform.translate('INVOKE_DEFAULT')
-    reset_cursor(context)
+    space.pivot_point = back_pvpt
 
 def scale(context):
-    cursor(context)
+    space = context.space_data
+    obj = bpy.context.active_object
+    back_pvpt = space.pivot_point
+    space.pivot_point = 'CURSOR'
     bpy.ops.transform.resize('INVOKE_DEFAULT')
-    reset_cursor(context)
+    space.pivot_point = back_pvpt
 
 
 class RotateOnCursor(bpy.types.Operator):
