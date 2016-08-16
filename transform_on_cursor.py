@@ -66,9 +66,7 @@ def orientation(context):
         bpy.ops.mesh.select_all(action='SELECT')
         back_pvpt = space.pivot_point
         space.pivot_point = 'CURSOR'
-        bpy.ops.transform.rotate('INVOKE_DEFAULT')
-        bpy.ops.transform.delete_orientation()
-        bpy.context.space_data.transform_orientation = 'GLOBAL'
+        bpy.ops.transform.rotate('INVOKE_DEFAULT', constraint_axis=(False, True, False), constraint_orientation='rotation_orientation')
         bpy.context.scene.cursor_location = saved_location
         space.pivot_point = back_pvpt
 
@@ -78,67 +76,88 @@ class RotateOnCursor(bpy.types.Operator):
     bl_idname = "mesh.rotate_on_cursor"
     bl_label = "Rotate On Cursor"
 
-    @classmethod
-    def poll(cls, context):
-        return context.active_object != None
+    operator = bpy.props.StringProperty("")
 
-    def execute(self, context):
-        rotate(context)
-        return {'FINISHED'}
+    count = 0
 
-class MoveOnCursor(bpy.types.Operator):
-    '''Move on Cursor'''
-    bl_idname = "mesh.move_on_cursor"
-    bl_label = "Move On Cursor"
+    def modal(self, context, event):
+        self.count += 1
 
-    @classmethod
-    def poll(cls, context):
-        return context.active_object != None
+        if self.count == 1:
+            if self.operator == "Translate":
+                move(context)
+            if self.operator == "Rotate":
+                rotate(context)
+            if self.operator == "Scale":
+                scale(context)
+            if self.operator == "RotateOnOrientation":
+                orientation(context)
 
-    def execute(self, context):
-        move(context)
-        return {'FINISHED'}
+        if event.type in {'X', 'Y', 'Z'}:
+            return {'PASS_THROUGH'}
 
-class ScaleOnCursor(bpy.types.Operator):
-    '''Scale on Cursor'''
-    bl_idname = "mesh.scale_on_cursor"
-    bl_label = "Scale On Cursor"
+        if event.type in {'RIGHTMOUSE', 'ESC', 'LEFTMOUSE'}:
+            return {'FINISHED'}
 
-    @classmethod
-    def poll(cls, context):
-        return context.active_object != None
+        return {'PASS_THROUGH'}
 
-    def execute(self, context):
-        scale(context)
-        return {'FINISHED'}
+    def invoke(self, context, event):
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
 
-class RotateOnOrientation(bpy.types.Operator):
-    '''Rotate on Orientation'''
-    bl_idname = "mesh.rotate_on_orientation"
-    bl_label = "Rotate On Orientation"
+addon_keymaps = []
 
-    @classmethod
-    def poll(cls, context):
-        return context.active_object != None
+def RegisterHotkeys():    
+    kcfg = bpy.context.window_manager.keyconfigs.addon
+    if kcfg:
+        #EDIT MODE
+        km = kcfg.keymaps.new(name='3D View', space_type='VIEW_3D')
 
-    def execute(self, context):
-        orientation(context)
-        return {'FINISHED'}
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'R', 'PRESS', shift=True, alt=True)
+        kmi.properties.operator = "RotateOnOrientation"
+        addon_keymaps.append((km, kmi))
 
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Translate"
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'R', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Rotate"
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Scale"
+        addon_keymaps.append((km, kmi))
+
+        # OBJECT MODE
+        km = kcfg.keymaps.new(name='Object Mode', space_type='VIEW_3D')
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Translate"
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'R', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Rotate"
+        addon_keymaps.append((km, kmi))
+
+        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
+        kmi.properties.operator = "Scale"
+        addon_keymaps.append((km, kmi))
+
+def UnRegisterHotkeys():
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
 
 def register():
     bpy.utils.register_class(RotateOnCursor)
-    bpy.utils.register_class(MoveOnCursor)
-    bpy.utils.register_class(ScaleOnCursor)
-    bpy.utils.register_class(RotateOnOrientation)
+    RegisterHotkeys()
 
 
 def unregister():
     bpy.utils.unregister_class(RotateOnCursor)
-    bpy.utils.unregister_class(MoveOnCursor)
-    bpy.utils.unregister_class(ScaleOnCursor)
-    bpy.utils.unregister_class(RotateOnOrientation)
+    UnRegisterHotkeys()
 
 
 if __name__ == "__main__":
     register()
+    unregister()
