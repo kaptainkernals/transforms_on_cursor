@@ -23,13 +23,14 @@ bl_info = {
     "version": (0, 3),
     "blender": (2, 77, 0),
     "location": "3D view",
-    "description": "Rotate on cursor based on Mont29's pivot point cursor code, rotate based on new orientation based on selected vertices",
+    "description": "Transform on cursor, rotate based on new orientation from selected vertices",
     "category": "3D View",
     }
 
 import bpy
 
 def rotate(context):
+    # inspired by Mont29's pivot point cursor code
     space = context.space_data
     if space.type == 'VIEW_3D':
         obj = bpy.context.active_object
@@ -67,6 +68,8 @@ def orientation(context):
         back_pvpt = space.pivot_point
         space.pivot_point = 'CURSOR'
         bpy.ops.transform.rotate('INVOKE_DEFAULT', constraint_axis=(False, True, False), constraint_orientation='rotation_orientation')
+        bpy.ops.transform.delete_orientation()
+        bpy.context.space_data.transform_orientation = 'GLOBAL'
         bpy.context.scene.cursor_location = saved_location
         space.pivot_point = back_pvpt
 
