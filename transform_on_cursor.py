@@ -120,31 +120,31 @@ def RegisterHotkeys():
         kmi.properties.operator = "RotateOnOrientation"
         addon_keymaps.append((km, kmi))
 
-        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
-        kmi.properties.operator = "Translate"
-        addon_keymaps.append((km, kmi))
+        # kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
+        # kmi.properties.operator = "Translate"
+        # addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'R', 'PRESS', shift=True, alt=True, ctrl=True)
         kmi.properties.operator = "Rotate"
         addon_keymaps.append((km, kmi))
 
-        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
-        kmi.properties.operator = "Scale"
-        addon_keymaps.append((km, kmi))
+        # kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
+        # kmi.properties.operator = "Scale"
+        # addon_keymaps.append((km, kmi))
 
         # OBJECT MODE
-        km = kcfg.keymaps.new(name='Object Mode', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
-        kmi.properties.operator = "Translate"
-        addon_keymaps.append((km, kmi))
+        # km = kcfg.keymaps.new(name='Object Mode', space_type='VIEW_3D')
+        # kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'G', 'PRESS', shift=True, alt=True, ctrl=True)
+        # kmi.properties.operator = "Translate"
+        # addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'R', 'PRESS', shift=True, alt=True, ctrl=True)
         kmi.properties.operator = "Rotate"
         addon_keymaps.append((km, kmi))
 
-        kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
-        kmi.properties.operator = "Scale"
-        addon_keymaps.append((km, kmi))
+        # kmi = km.keymap_items.new("mesh.rotate_on_cursor", 'S', 'PRESS', shift=True, alt=True, ctrl=True)
+        # kmi.properties.operator = "Scale"
+        # addon_keymaps.append((km, kmi))
 
 def UnRegisterHotkeys():
     for km, kmi in addon_keymaps:
