@@ -20,7 +20,7 @@
 bl_info = {
     "name": "Transform on Cursor",
     "author": "Kaptainkernals",
-    "version": (0, 3),
+    "version": (0, 4),
     "blender": (2, 77, 0),
     "location": "3D view",
     "description": "Transform on cursor, rotate based on new orientation from selected vertices",
@@ -36,6 +36,15 @@ def rotate(context):
         obj = bpy.context.active_object
         back_pvpt = space.pivot_point
         space.pivot_point = 'CURSOR'
+        bpy.ops.transform.rotate('INVOKE_DEFAULT')
+        space.pivot_point = back_pvpt
+
+def rotateActive(context):
+    space = context.space_data
+    if space.type == 'VIEW_3D':
+        obj = bpy.context.active_object
+        back_pvpt = space.pivot_point
+        space.pivot_point = 'ACTIVE_ELEMENT'
         bpy.ops.transform.rotate('INVOKE_DEFAULT')
         space.pivot_point = back_pvpt
 
@@ -73,6 +82,18 @@ def orientation(context):
         bpy.context.scene.cursor_location = saved_location
         space.pivot_point = back_pvpt
 
+class RotateOnActive(bpy.types.Operator):
+    '''Rotate on Active'''
+    bl_idname = "mesh.rotate_on_active"
+    bl_label = "Rotate On Active"
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object != None
+
+    def execute(self, context):
+        rotateActive(context)
+        return {'FINISHED'}
 
 class RotateOnCursor(bpy.types.Operator):
     '''Rotate on Cursor'''
@@ -153,11 +174,13 @@ def UnRegisterHotkeys():
 
 def register():
     bpy.utils.register_class(RotateOnCursor)
+    bpy.utils.register_class(RotateOnActive)
     RegisterHotkeys()
 
 
 def unregister():
     bpy.utils.unregister_class(RotateOnCursor)
+    bpy.utils.unregister_class(RotateOnActive)
     UnRegisterHotkeys()
 
 
